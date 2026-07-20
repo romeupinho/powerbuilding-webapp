@@ -1,4 +1,4 @@
-const CACHE_NAME = 'powerbuilding-v1-5-history-import';
+const CACHE_NAME = 'powerbuilding-v1-5-history-import-2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const APP_SHELL = [
   './assets/css/styles.css',
   './assets/js/data.js',
   './assets/js/app.js',
+  './assets/js/history-import.js',
   './assets/icons/icon.svg'
 ];
 
