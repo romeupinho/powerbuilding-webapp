@@ -1,4 +1,4 @@
-const CACHE_NAME = 'powerbuilding-v1-4-structured';
+const CACHE_NAME = 'powerbuilding-v1-5-history-import';
 const APP_SHELL = [
   './',
   './index.html',
