@@ -5,7 +5,7 @@ screenHeader = function(title, sub = '', right = '') {
   const showSettings = currentScreen === 'log';
 
   const backButton = showBack
-    ? '<button class="iconBtn" type="button" aria-label="Voltar" onclick="pbBack()">←</button>'
+    ? '<button class="iconBtn backCircle" type="button" aria-label="Voltar" onclick="pbBack()">←</button>'
     : '';
 
   const settingsButton = showSettings
