@@ -1,8 +1,8 @@
 'use strict';
 
-// Incremental UI layer for the approved workout-flow improvements.
-// The original app.js remains untouched; this file only overrides the
-// presentation/interaction points that need to change.
+// Final approved V2 workout UI layer.
+// The original app.js remains untouched; this file overrides only the
+// presentation and interaction points required by the V2 flow.
 
 const pbOriginalGo = go;
 const pbNavStack = [];
@@ -33,22 +33,23 @@ function pbBack() {
   else pbOriginalGo('home');
 }
 
+function pbBackIcon() {
+  return '<svg class="backIconSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>';
+}
+
 screenHeader = function(title, sub = '', right = '') {
-  let action = '';
-  let icon = '';
-  let label = '';
+  const showBack = ['week', 'day', 'workout', 'settings'].includes(currentScreen);
+  const showSettings = currentScreen === 'log';
 
-  if (currentScreen === 'log') {
-    icon = '⚙';
-    action = "go('settings')";
-    label = 'Configurações';
-  } else if (['week', 'day', 'workout', 'settings'].includes(currentScreen)) {
-    icon = '←';
-    action = 'pbBack()';
-    label = 'Voltar';
-  }
+  const backButton = showBack
+    ? `<button class="iconBtn backCircle" type="button" aria-label="Voltar" onclick="pbBack()">${pbBackIcon()}</button>`
+    : '';
 
-  return `<div class="topbar"><div><div class="eyebrow">${sub}</div><h1 class="title">${title}</h1></div>${icon ? `<button class="iconBtn" type="button" aria-label="${label}" onclick="${action}">${icon}</button>` : ''}</div>`;
+  const settingsButton = showSettings
+    ? '<button class="iconBtn" type="button" aria-label="Configurações" onclick="go(\'settings\')">⚙</button>'
+    : '';
+
+  return `<div class="topbar"><div class="topbarLeft">${backButton}<div><div class="eyebrow">${sub}</div><h1 class="title">${title}</h1></div></div>${settingsButton}</div>`;
 };
 
 function pbDisplayLog(x) {
@@ -96,7 +97,7 @@ function pbExerciseCard(x, index, total) {
   const percentLine = ctx.pctRef ? `<span class="pill">${ctx.pctRef}% do ${ctx.main}</span>` : '';
   const prPreview = ctx.isPr ? '<span class="pill prBadge">Novo e1RM PR</span>' : '';
 
-  return `<div class="card workoutExerciseCard ${log.completed ? 'exerciseSaved' : ''}"><div class="row"><div><p>Exercício ${index + 1} de ${total}</p><h3>${x.exercise}</h3><p>Planeado: ${x.sets}×${x.reps}${x.plannedWeight ? ' · ' + kg(x.plannedWeight) : ''}</p></div><span class="pill">RPE ${x.targetRpe || '—'}</span></div><div class="chiprow"><span class="pill">${x.type}</span><span class="pill">${ctx.main}</span>${percentLine}${prPreview}</div>${x.notes ? `<p>${x.notes}</p>` : ''}<table class="setTable workoutSetTable"><thead><tr><th>Série</th><th>Kg</th><th>Reps</th><th>RPE</th><th>✓</th></tr></thead><tbody>${rows}</tbody></table><button class="secondary compactAction" type="button" onclick="addSet('${x.id}')">+ Adicionar Set</button><div class="grid2 workoutMetrics"><div><p>e1RM estimado</p><div class="smallMetric">${kg(best)}</div><p class="miniNote">PR exercício: ${ctx.exBest ? kg(ctx.exBest) : '—'}</p></div><div><p>Tonelagem</p><div class="smallMetric">${kg(volume)}</div><p class="miniNote">Dif. planeado: ${kg(volume - (Number(x.plannedTonnage) || 0))}</p></div></div><div class="field"><label>Notas</label><textarea onchange="updateNotes('${x.id}',this.value)">${pbEscape(log.notes || '')}</textarea></div><button class="primary compactAction" type="button" onclick="completeExercise('${x.id}')">Guardar exercício</button>${log.completed ? '<div class="savedLine"><span class="statusDot done"></span><span>Guardado</span></div>' : ''}</div>`;
+  return `<div class="card workoutExerciseCard ${log.completed ? 'exerciseSaved' : ''}"><div class="row"><div><p>Exercício ${index + 1} de ${total}</p><h3>${x.exercise}</h3><p>Planeado: ${x.sets}×${x.reps}${x.plannedWeight ? ' · ' + kg(x.plannedWeight) : ''}</p></div><span class="pill">RPE ${x.targetRpe || '—'}</span></div><div class="chiprow"><span class="pill">${x.type}</span><span class="pill">${ctx.main}</span>${percentLine}${prPreview}</div>${x.notes ? `<p>${x.notes}</p>` : ''}<table class="setTable workoutSetTable"><thead><tr><th>Set</th><th>Kg</th><th>Reps</th><th>RPE</th><th>✓</th></tr></thead><tbody>${rows}</tbody></table><button class="secondary compactAction" type="button" onclick="addSet('${x.id}')">+ Adicionar Set</button><div class="grid2 workoutMetrics"><div><p>e1RM estimado</p><div class="smallMetric">${kg(best)}</div><p class="miniNote">PR exercício: ${ctx.exBest ? kg(ctx.exBest) : '—'}</p></div><div><p>Tonelagem</p><div class="smallMetric">${kg(volume)}</div><p class="miniNote">Dif. planeado: ${kg(volume - (Number(x.plannedTonnage) || 0))}</p></div></div><div class="field"><label>Notas</label><textarea onchange="updateNotes('${x.id}',this.value)">${pbEscape(log.notes || '')}</textarea></div><button class="primary compactAction" type="button" onclick="completeExercise('${x.id}')">Guardar exercício</button>${log.completed ? '<div class="savedLine"><span class="statusDot done"></span><span>Guardado</span></div>' : ''}</div>`;
 }
 
 renderWorkout = function() {
@@ -182,7 +183,7 @@ completeExercise = function(id) {
 };
 
 function finishWorkout() {
-  const w = selectedWeek || state.settings.currentWeek || 1;
+  const w = Number(selectedWeek || state.settings.currentWeek || 1);
   const items = dayItems(w, selectedDay);
   const missing = items.filter(x => !state.logs[x.id]?.completed);
 
@@ -191,7 +192,21 @@ function finishWorkout() {
     return;
   }
 
-  toast('Treino concluído');
+  let advancedWeek = false;
+  const currentWeek = Number(state.settings.currentWeek || 1);
+
+  if (w === currentWeek && w < 12) {
+    const allWeekExercises = weekItems(w);
+    const weekComplete = allWeekExercises.length > 0 && allWeekExercises.every(x => state.logs[x.id]?.completed);
+
+    if (weekComplete) {
+      state.settings.currentWeek = w + 1;
+      save();
+      advancedWeek = true;
+    }
+  }
+
+  toast(advancedWeek ? `Semana ${w} concluída · Semana ${w + 1} ativa` : 'Treino concluído');
   go('log');
 }
 
@@ -236,6 +251,6 @@ function bindWorkoutSwipe() {
   });
 }
 
-// Re-render once after the base app has loaded so the header rules take effect
-// immediately on the initial Home screen.
+// Re-render once after the base app has loaded so the final V2 header rules
+// take effect immediately on the initial screen.
 render();
