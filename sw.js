@@ -1,4 +1,4 @@
-const CACHE_NAME = 'powerbuilding-v1-6-workout-ui';
+const CACHE_NAME = 'powerbuilding-v2-final';
 const APP_SHELL = [
   './',
   './index.html',
