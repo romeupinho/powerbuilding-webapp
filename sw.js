@@ -1,12 +1,14 @@
-const CACHE_NAME = 'powerbuilding-v1-5-history-import-2';
+const CACHE_NAME = 'powerbuilding-v2-final';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './assets/css/styles.css',
+  './assets/css/workout-v2.css',
   './assets/js/data.js',
   './assets/js/app.js',
   './assets/js/history-import.js',
+  './assets/js/workout-v2.js',
   './assets/icons/icon.svg'
 ];
 
